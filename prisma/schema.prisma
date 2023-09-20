@@ -20,8 +20,54 @@ model User {
   cpf                 String
   phone_number        String
   role                Int      @default(1)
+  addresses           Address[]
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt()
 
   @@map("users")
+}
+
+model State {
+  id                  Int      @id @default(autoincrement())
+  uuid                String   @unique @default(uuid())
+  cities              City[]    
+  name                String
+  abbreviation        String
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt()
+
+  @@map("states")
+
+}
+
+model City {
+  id                  Int      @id @default(autoincrement())
+  uuid                String   @unique @default(uuid())
+  state               State    @relation(fields: [state_id], references: [id])
+  state_id            Int
+  name                String
+  addresses           Address[]
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt()
+
+  @@map("cities")
+
+}
+
+model Address {
+  id                  Int       @id @default(autoincrement())
+  uuid                String    @unique @default(uuid())
+  user                User     @relation(fields: [user_id], references: [id])
+  user_id             Int
+  city                City      @relation(fields: [city_id], references: [id])
+  city_id             Int
+  name                String
+  complement          String?   @db.Text()
+  postal_code         String
+  address_number      String
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt()
+
+  @@map("addresses")
+
 }
