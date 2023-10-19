@@ -30,6 +30,6 @@ export class StateController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.stateService.remove(+id);
+    return this.stateService.remove(id);
   }
 }

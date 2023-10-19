@@ -54,7 +54,22 @@ export class StateService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} state`;
+  async remove(uuid: string) {
+    try 
+    {
+      await this.prisma.state.delete({
+        where: {
+          uuid: uuid
+        }
+      });
+
+      return `${uuid} is removed!`;
+      
+    } 
+    catch (error) 
+    {
+      throw new NotFoundException('Register not deleted!');
+      
+    }
   }
 }
