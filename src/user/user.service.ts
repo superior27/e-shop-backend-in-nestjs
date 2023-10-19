@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { encryptAction } from './actions/user.encrypt-password.action';
@@ -23,16 +23,55 @@ export class UserService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(uuid: string) {
+    
+    const user = await this.prisma.user.findUnique({
+      where: {
+        uuid:uuid
+      }
+    });
+    
+    if(!user)
+    {
+      throw new NotFoundException('Register not found!');
+    }
+
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(uuid: string, updateUserDto: UpdateUserDto) {
+    try 
+    {
+      return await this.prisma.user.update({
+        where: {
+          uuid:uuid
+        },
+        data: updateUserDto
+      });
+      
+    } 
+    catch (error) 
+    {
+      throw new NotFoundException('Register not updated!');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(uuid: string) {
+    try 
+    {
+      await this.prisma.user.delete({
+        where: {
+          uuid: uuid
+        }
+      });
+      
+      return `${uuid} is removed!`;
+    } 
+    catch (error) 
+    {
+      throw new NotFoundException("Register not deleted!");
+      
+    }
   }
 
 }
