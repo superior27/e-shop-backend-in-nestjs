@@ -1,26 +1,95 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CityService {
-  create(createCityDto: CreateCityDto) {
-    return 'This action adds a new city';
+
+  constructor(private readonly prisma: PrismaService){}
+
+  async create(createCityDto: CreateCityDto) {
+    
+    try 
+    {
+      return await this.prisma.city.create({
+        data: createCityDto,
+        include: {
+          state: true
+        }
+      })
+      
+    } catch (error) 
+    {
+      throw new BadRequestException('Register not created!');  
+    }
+
   }
 
-  findAll() {
-    return `This action returns all city`;
+  async findAll(page: number = 1) {
+    return await this.prisma.city.findMany({
+      take: 10,
+      skip: 10 * (page - 1),
+      include: {
+        state: true
+      }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} city`;
+  async findOne(uuid: string) {
+    
+    const city = this.prisma.city.findUnique({
+      where: {
+        uuid: uuid
+      }
+    });
+    
+    if(!city)
+    {
+      throw new BadRequestException('Register not found!');
+    }
+
+    return city;
   }
 
-  update(id: number, updateCityDto: UpdateCityDto) {
-    return `This action updates a #${id} city`;
+  async update(uuid: string, updateCityDto: UpdateCityDto) {
+    try 
+    {
+      return await this.prisma.city.update({
+        where: {
+          uuid: uuid
+        },
+        data: updateCityDto,
+        include: {
+          state: true
+        }
+      });
+      
+    } 
+    catch (error) 
+    {
+      throw new BadRequestException('Register not updated!');
+      
+    }
+    
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} city`;
+  async remove(uuid: string) {
+    try 
+    {
+      await this.prisma.city.delete({
+        where: {
+          uuid: uuid
+        }
+      });
+    
+      return `${uuid} is removed!`
+      
+    } 
+    catch (error) 
+    {
+      throw new BadRequestException('Register not deleted!');
+    }
+    
   }
 }

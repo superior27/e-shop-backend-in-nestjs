@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CityService } from './city.service';
 import { CreateCityDto } from './dto/create-city.dto';
 import { UpdateCityDto } from './dto/update-city.dto';
 
-@Controller('city')
+@Controller('cities')
 export class CityController {
   constructor(private readonly cityService: CityService) {}
 
@@ -13,22 +13,24 @@ export class CityController {
   }
 
   @Get()
-  findAll() {
-    return this.cityService.findAll();
+  findAll(@Query('page') page: number = 1) 
+  {
+    page = isNaN(+page) ? 1 : Math.trunc(page);
+    return this.cityService.findAll(page);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.cityService.findOne(+id);
+    return this.cityService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCityDto: UpdateCityDto) {
-    return this.cityService.update(+id, updateCityDto);
+    return this.cityService.update(id, updateCityDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.cityService.remove(+id);
+    return this.cityService.remove(id);
   }
 }
