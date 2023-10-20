@@ -1,26 +1,97 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { returnOnlyNumber } from '../helpers/return-only-number.helper';
+
 
 @Injectable()
 export class AddressService {
-  create(createAddressDto: CreateAddressDto) {
-    return 'This action adds a new address';
+
+  constructor(private readonly prisma: PrismaService){}
+
+  async create(createAddressDto: CreateAddressDto) {
+    try 
+    {
+
+      return await this.prisma.address.create({
+        data: createAddressDto
+      });
+
+    } 
+    catch (error) 
+    {
+      throw new BadRequestException('Register not created!');
+    }
+    
   }
 
-  findAll() {
-    return `This action returns all address`;
+  async findAll(page: number = 1) {
+    return await this.prisma.address.findMany({
+      take: 10,
+      skip: 10 * (page - 1),
+      include: {
+        city: {
+          include: {
+            state: true
+          }
+        }
+      }
+
+    });  
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} address`;
+  async findOne(uuid: string) {
+    try 
+    {
+      return await this.prisma.address.findUnique({
+        where: {
+          uuid: uuid,
+        }
+      });
+      
+    } catch (error) 
+    {
+      throw new NotFoundException('Register not found!');
+    }
+    
   }
 
-  update(id: number, updateAddressDto: UpdateAddressDto) {
-    return `This action updates a #${id} address`;
+  async update(uuid: string, updateAddressDto: UpdateAddressDto) {
+    if(updateAddressDto?.postal_code)
+    {
+      updateAddressDto.postal_code = returnOnlyNumber(updateAddressDto.postal_code);
+    }
+    try 
+    {
+      return await this.prisma.address.update({
+        where: {
+          uuid: uuid
+        },
+        data: updateAddressDto
+      });
+      
+    } 
+    catch (error) 
+    {
+      throw new NotFoundException('Register not updated!'); 
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} address`;
+  async remove(uuid: string) {
+    try 
+    {
+      return await this.prisma.address.delete({
+        where: {
+          uuid: uuid
+        }
+      });
+      
+    } 
+    catch (error) 
+    {
+      throw new NotFoundException('Register not deleted!');
+    }
   }
+  
 }
