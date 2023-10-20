@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { returnOnlyNumber } from '../helpers/return-only-number.helper';
+import { postalCodeValidator } from './actions/user.encrypt-password.action';
 
 
 @Injectable()
@@ -11,6 +11,9 @@ export class AddressService {
   constructor(private readonly prisma: PrismaService){}
 
   async create(createAddressDto: CreateAddressDto) {
+
+    createAddressDto.postal_code = postalCodeValidator(createAddressDto.postal_code);
+    
     try 
     {
 
@@ -60,7 +63,7 @@ export class AddressService {
   async update(uuid: string, updateAddressDto: UpdateAddressDto) {
     if(updateAddressDto?.postal_code)
     {
-      updateAddressDto.postal_code = returnOnlyNumber(updateAddressDto.postal_code);
+      updateAddressDto.postal_code = postalCodeValidator(updateAddressDto.postal_code);
     }
     try 
     {
