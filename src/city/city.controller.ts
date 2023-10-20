@@ -19,6 +19,12 @@ export class CityController {
     return this.cityService.findAll(page);
   }
 
+  @Get('/by-state/:state_id')
+  findAllByState(@Query('page')page: number = 1, @Param('state_id')state_uuid: string) {
+    page = isNaN(+page) ? 1 : Math.trunc(page);
+    return this.cityService.findAllByState(+page, state_uuid);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.cityService.findOne(id);

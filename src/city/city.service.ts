@@ -92,4 +92,19 @@ export class CityService {
     }
     
   }
+
+  async findAllByState(page: number = 1, state_uuid: string) {
+    return await this.prisma.city.findMany({
+      take: 10,
+      skip: 10 * (page - 1),
+      include: {
+        state: true
+      },
+      where: {
+        state: {
+          uuid: state_uuid
+        }
+      }
+    });
+  }
 }
